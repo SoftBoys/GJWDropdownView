@@ -11,7 +11,7 @@
 @implementation GJWMainCell
 
 + (instancetype)cellForTableView:(UITableView *)tableView {
-    static NSString *identifier = @"maincell";
+    NSString *identifier = NSStringFromClass([self class]);
     GJWMainCell *mainCell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if (mainCell == nil) {
         mainCell = [[GJWMainCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];

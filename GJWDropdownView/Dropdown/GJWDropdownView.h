@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GJWMainCell.h"
+#import "GJWSubCell.h"
+
 @class GJWDropdownView;
+
 @protocol GJWDropdownViewDelegate <NSObject>
 @optional
 - (void)didClickCancel;
@@ -20,7 +24,22 @@
 - (NSInteger)numberOfRowsInDropdownView:(GJWDropdownView *)dropdownView;
 - (NSInteger)dropdownView:(GJWDropdownView *)dropdownView numberOfRowsInMainTable:(NSInteger)mainRow;
 
+@optional
+- (GJWMainCell *)dropdownView:(GJWDropdownView *)dropdownView cellForTableView:(UITableView *)tableView inMainTable:(NSInteger)row;
+- (GJWSubCell *)dropdownView:(GJWDropdownView *)dropdownView cellForTableView:(UITableView *)tableView inSubTable:(NSInteger)subRow inMainTable:(NSInteger)mainRow;
+/**
+ *  返回mainCell标题 （注：实现dropdownView: cellForTableView: inMainTable: 方法后此方法无效）
+ *
+ *  @param dropdownView <#dropdownView description#>
+ *  @param row          行
+ */
 - (NSString *)dropdownView:(GJWDropdownView *)dropdownView titleForRowInMainTable:(NSInteger)row;
+/**
+ *  返回subCell标题 （注：实现dropdownView: cellForTableView: inSubTable: inMainTable: 方法后此方法无效）
+ *
+ *  @param dropdownView <#dropdownView description#>
+ *  @param row          行
+ */
 - (NSString *)dropdownView:(GJWDropdownView *)dropdownView titleForRowInSubTable:(NSInteger)subRow inMainTable:(NSInteger)mainRow;
 @end
 @interface GJWDropdownView :UIView
@@ -31,8 +50,25 @@
 
 @property (nonatomic, weak) id<GJWDropdownViewDelegate> delegate;
 @property (nonatomic, weak) id<GJWDropdownViewDataSource> dataSource;
-
-
-@property (nonatomic, assign, getter=isHideDropdown) BOOL hideDropdown;
+/**
+ *  显示视图
+ */
+- (void)showDropdown;
+/**
+ *  显示视图
+ *
+ *  @param duration 动画时间（默认0.25s）
+ */
+- (void)showDropdownWithDuration:(NSTimeInterval)duration;
+/**
+ *  隐藏视图
+ */
+- (void)hiddenDropdown;
+/**
+ *  隐藏视图
+ *
+ *  @param duration 动画时间（默认0.25s）
+ */
+- (void)hiddenDropdownWithDuration:(NSTimeInterval)duration;
 
 @end

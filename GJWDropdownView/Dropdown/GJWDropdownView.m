@@ -17,6 +17,7 @@
 @property (nonatomic, strong) UIView *backView;
 
 @property (nonatomic, assign) NSInteger selectedMainRow;
+
 @end
 
 @implementation GJWDropdownView
@@ -86,16 +87,28 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = nil;
     if (tableView == self.mainTableView) {
-        cell = [GJWMainCell cellForTableView:tableView];
-        cell.textLabel.text = [self.dataSource dropdownView:self titleForRowInMainTable:indexPath.row];
-        cell.selected = indexPath.row == self.selectedMainRow;
-//        UIColor *textColor = cell.isSelected ? [UIColor redColor]:[UIColor blackColor];
-//        cell.textLabel.textColor = textColor;
+        
+        if ([self.dataSource respondsToSelector:@selector(dropdownView:cellForTableView:inMainTable:)]) {
+            cell = [self.dataSource dropdownView:self cellForTableView:tableView inMainTable:indexPath.row];
+            
+        } else {
+            cell = [GJWMainCell cellForTableView:tableView];
+            if ([self.dataSource respondsToSelector:@selector(dropdownView:titleForRowInMainTable:)]) {
+                cell.textLabel.text = [self.dataSource dropdownView:self titleForRowInMainTable:indexPath.row];
+            }
+            
+        }
         
     } else {
-        cell = [GJWSubCell cellForTableView:tableView];
         
-        cell.textLabel.text = [self.dataSource dropdownView:self titleForRowInSubTable:indexPath.row inMainTable:self.selectedMainRow];
+        if ([self.dataSource respondsToSelector:@selector(dropdownView:cellForTableView:inSubTable:inMainTable:)]) {
+            cell = [self.dataSource dropdownView:self cellForTableView:tableView inSubTable:indexPath.row inMainTable:self.selectedMainRow];
+        } else {
+            cell = [GJWSubCell cellForTableView:tableView];
+            if ([self.dataSource respondsToSelector:@selector(dropdownView:titleForRowInSubTable:inMainTable:)]) {
+                cell.textLabel.text = [self.dataSource dropdownView:self titleForRowInSubTable:indexPath.row inMainTable:self.selectedMainRow];
+            }
+        }
     }
     
     return cell;
@@ -127,30 +140,37 @@
 }
 
 #pragma mark - 点击空白区域
-//- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    [self tapClick];
-//}
-
 - (void)tapClick {
     
-    self.hideDropdown = YES;
+    [self hiddenDropdown];
     
     if ([self.delegate respondsToSelector:@selector(didClickCancel)]) {
         [self.delegate didClickCancel];
     }
 }
 
-- (void)setHideDropdown:(BOOL)hideDropdown {
+- (void)showDropdown {
+    [self showDropdownWithDuration:0.25];
+}
+- (void)showDropdownWithDuration:(NSTimeInterval)duration {
+    [self setHideDropdown:NO duration:duration];
+}
+- (void)hiddenDropdown {
+    [self hiddenDropdownWithDuration:0.25];
+}
+- (void)hiddenDropdownWithDuration:(NSTimeInterval)duration {
+    [self setHideDropdown:YES duration:duration];
+}
+- (void)setHideDropdown:(BOOL)hideDropdown duration:(NSTimeInterval)duration {
     
-    _hideDropdown = hideDropdown;
     if (hideDropdown == NO) {
         self.hidden = hideDropdown;
     }
     float height = CGRectGetHeight(self.mainTableView.frame);
     
-    CGAffineTransform transform = _hideDropdown ? CGAffineTransformIdentity:CGAffineTransformMakeTranslation(0, height);
-    UIColor *backColor = _hideDropdown ? [UIColor clearColor]:[UIColor colorWithWhite:0 alpha:0.5];
-    [UIView animateWithDuration:0.25 animations:^{
+    CGAffineTransform transform = hideDropdown ? CGAffineTransformIdentity:CGAffineTransformMakeTranslation(0, height);
+    UIColor *backColor = hideDropdown ? [UIColor clearColor]:[UIColor colorWithWhite:0 alpha:0.5];
+    [UIView animateWithDuration:duration animations:^{
         self.mainTableView.transform = transform;
         self.subTableView.transform = transform;
         self.backView.backgroundColor = backColor;
